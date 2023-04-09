@@ -24,6 +24,9 @@ mongoose
   });
 const app = require('./app');
 
+const test = 45;
+console.log(test)
+
 const port = process.env.PORT;
 
 //starting server
