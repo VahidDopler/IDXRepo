@@ -2,7 +2,7 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
 dotenv.config({
-  path: './config.env',
+  path: `${__dirname}/config.env`,
 });
 
 // const DB = process.env.DATABASE.replace(
@@ -23,9 +23,6 @@ mongoose
     console.log(err.message);
   });
 const app = require('./app');
-
-const test = 45;
-console.log(test)
 
 const port = process.env.PORT;
 

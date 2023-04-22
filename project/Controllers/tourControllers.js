@@ -6,7 +6,7 @@ const APIFeatures = require('../utils/APIFeatures');
 
 
 
-//function to get prefill query field to proccess of best 5 cheap
+//function to get prefill query field to process of best 5 cheap
 exports.getaliesTour = (req, res, next) => {
   req.query.sort = '-ratingsAverage,price';
   req.query.limit = 4;
@@ -17,8 +17,8 @@ exports.getaliesTour = (req, res, next) => {
 exports.getAllTours = async (req, res) => {
   try {
     //The new shape of codes
-    //we save query deatil of query in object then save mongodb obj into object of class
-    //then proccess the object in filter method
+    //we save query detail of query in object then save mongodb obj into object of class
+    //then process the object in filter method
     const features = new APIFeatures(Tour.find(), req.query)
       .filter()
       .pagination()
@@ -26,7 +26,7 @@ exports.getAllTours = async (req, res) => {
       .limitFields();
     const tours = await features.queryOfMongoDB;
 
-    //Seding RESPONSE
+    //sending RESPONSE
     res.status(200).send({
       status: 'success',
       tour_counts: tours.length,
@@ -71,7 +71,7 @@ exports.deleteTour = async (req, res) => {
   try {
     const resultForSaving = await Tour.findById(req.params.id);
     await deleteTourModel.create({
-      createLog: new Date().echo(),
+      createLog: new Date().toDateString(),
       deletedObject: resultForSaving,
     });
     await Tour.findByIdAndDelete(req.params.id);
@@ -141,7 +141,7 @@ exports.getTourStats = async (req, res) => {
           _id: '$_id',
           numOfTour: { $sum: 1 },
           ratingQuantity: { $sum: '$ratingsQuantity' },
-          avergae_price: { $avg: '$price' },
+          average_price: { $avg: '$price' },
           max_price: { $max: '$price' },
           min_price: { $min: '$price' },
           name_of_Tour: { $first: '$name' },
@@ -216,7 +216,7 @@ exports.getMonthlyPlan = async (req, res) => {
             $let: {
               vars: {
                 monthsInString: [
-                  ,
+                  undefined,
                   'Jan',
                   'Feb',
                   'Mar',
