@@ -87,10 +87,42 @@ tourSchema.pre('save', function (next) {
 //so in post we have doc which saved and in pre we have just access to next
 //and this in pre method is doc we want to save in document.
 
-tourSchema.pre('find', function (next) {
-    this.find({secretTour : {$ne : true}})
+
+//Making comment here
+//in find and other find-and... methods when used
+//we use pre and post in query object we send into mongodb
+//and we can have specific things we want
+//this means query of mongodb
+tourSchema.pre(/^find/, function (next) {
+    this.find({secretTour: {$ne: true}})
     next()
 })
+
+//docs logged after query done in mongodb
+tourSchema.post(/^find/, function (docs, next) {
+    // docs.forEach(el => {
+    //     console.log(el._id);
+    // })
+    next()
+})
+
+
+//aggregation middleware
+
+tourSchema.pre('aggregate', function (next) {
+    console.log(this.pipeline())
+    this.pipeline().unshift({
+        $match: {
+            secretTour: {$ne: true}
+        }
+    })
+    next()
+})
+
+//if updating specific tour does not work
+//because of that secret field was excluded
+
+
 
 const Tour = mongoose.model('Tour', tourSchema);
 

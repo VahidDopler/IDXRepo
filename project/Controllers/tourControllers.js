@@ -130,32 +130,18 @@ exports.getTourStats = async (req, res) => {
   try {
     const stats = await Tour.aggregate([
       {
-        $match: {
-          price: {
-            $gt: 1000,
-          },
-        },
-      },
-      {
         $group: {
-          _id: '$_id',
+          _id: '$difficulty',
           numOfTour: { $sum: 1 },
           ratingQuantity: { $sum: '$ratingsQuantity' },
           average_price: { $avg: '$price' },
           max_price: { $max: '$price' },
           min_price: { $min: '$price' },
-          name_of_Tour: { $first: '$name' },
-          tourName: { $first: '$name' },
-          tourPrice: { $first: '$price' },
+          avgRating: {$avg : '$ratingsAverage'}
         },
       },
       {
         $sort: { tourPrice: -1 },
-      },
-      {
-        $match: {
-          tourPrice: { $ne: 1997 },
-        },
       },
     ]);
 
