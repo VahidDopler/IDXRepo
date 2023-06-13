@@ -3,6 +3,7 @@ const Tour = require('../models/tourModel');
 const deleteTourModel = require('../models/deleteTourLog');
 const errLogger = require('../functionMilddlers/errSaver');
 const APIFeatures = require('../utils/APIFeatures');
+const {limitFieldOfDocObject} = require('../utils/UpdateUtils')
 
 
 
@@ -45,10 +46,12 @@ exports.getAllTours = async (req, res) => {
 
 exports.UpdateTour = async (req, res) => {
   try {
-    const result = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+    const response =  Tour.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
+    const result = await limitFieldOfDocObject(response);
+
     res.status(200).json({
       status: 'success',
       data: {

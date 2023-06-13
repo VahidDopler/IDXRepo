@@ -1,3 +1,4 @@
+(function (require , module , __dirname , __filename , exports){})();
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
@@ -31,3 +32,5 @@ app.listen(port, () => {
   // eslint-disable-next-line no-console
   console.log('server is running in port ', port);
 });
+
+//Comment

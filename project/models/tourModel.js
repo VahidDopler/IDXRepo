@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify')
+const validit = require('validator')
 const tourSchema = new mongoose.Schema(
     {
         name: {
@@ -7,6 +8,12 @@ const tourSchema = new mongoose.Schema(
             required: [true, 'A tour must have A name '],
             unique: true,
             trim: true,
+            // validate : {
+            //     validator : function (val) {
+            //         return validit.isAlpha(val)
+            //     },
+            //     message : 'Your tour name must include letter , not anything else!!!'
+            // },
             minLength: [10, "A tour must have a equal or more than 10 characters"],
             maxLength: [40, "A tour must have a equal or less than 40 characters"]
         },
@@ -14,10 +21,8 @@ const tourSchema = new mongoose.Schema(
         ratingsAverage: {
             type: Number,
             default: 4.5,
-            max: {
-                values: 5,
-                message: "A tour must have less or equal 5 score RatingAverage"
-            }
+            max: [5.0, "A tour must have less or equal 5 score RatingAverage"],
+            min: [1.0, "A tour must have more or equal 0 score RatingAverage"]
         },
         ratingsQuantity: {
             type: Number,
@@ -51,6 +56,13 @@ const tourSchema = new mongoose.Schema(
         },
         priceDiscount: {
             type: Number,
+            validate : {
+                // This only work for Creating new Document , this.price has access to the doc which we post to the mongoose
+                validator :function (val) {
+                    return val < this.price;
+                },
+                message : "Your Discount ({VALUE}) should be equal or less than price!!"
+            }
         },
         summary: {
             type: String,
@@ -80,11 +92,13 @@ const tourSchema = new mongoose.Schema(
     }
 );
 
+//add some properties for the doc we will send to the client , not in db , so this is virtual which added after the processing
 tourSchema.virtual('durationWeek').get(function () {
     //duration week field
     return Math.round(this.duration / 7);
 })
 
+//This Document middleware : runs before save() and save()
 tourSchema.pre('save', function (next) {
     this.slug = slugify(this.name, {lower: true});
     next();
@@ -114,6 +128,11 @@ tourSchema.post(/^find/, function (docs, next) {
     // docs.forEach(el => {
     //     console.log(el._id);
     // })
+    next()
+})
+
+
+tourSchema.post("findOneAndUpdate", function (docs , next){
     next()
 })
 
