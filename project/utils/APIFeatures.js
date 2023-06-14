@@ -65,8 +65,8 @@ class APIFeatures {
 
   pagination() {
     //4) Pagination
-    const limit = this.queryOfExpress.limit * 1 || 2;
     const page = this.queryOfExpress.page * 1 || 1;
+    const limit = this.queryOfExpress.limit * 1 || 100;
     const skip = (page - 1) * limit;
     this.queryOfMongoDB = this.queryOfMongoDB.skip(skip).limit(limit);
 

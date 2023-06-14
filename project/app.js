@@ -19,7 +19,7 @@ if (process.env.NODE_ENV === 'developement') {
   app.use(morgan('dev'));
 }
 app.use(express.static(`${__dirname}/public/`));
-app.use(function(res , req,  next){
+app.use(function(req , res,  next){
   console.log("Hello from middleware");
   next();
 })
