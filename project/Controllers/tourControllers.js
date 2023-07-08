@@ -6,7 +6,6 @@ const APIFeatures = require('../utils/APIFeatures');
 const {limitFieldOfDocObject} = require('../utils/UpdateUtils')
 
 
-
 //function to get prefill query field to process of best 5 cheap
 exports.getaliesTour = (req, res, next) => {
   req.query.sort = '-ratingsAverage,price';
@@ -95,7 +94,8 @@ exports.deleteTour = async (req, res) => {
 
 exports.getSpecificTour = async (req, res) => {
   try {
-    console.log(req.params);
+    //console.log(req.params);
+    console.log("Here in specific tour");
     const tour = await Tour.findById(req.params.id);
     res.status(200).send({
       status: 'success',

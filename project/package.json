@@ -20,7 +20,8 @@
     "morgan": "^1.10.0",
     "nodemon": "^2.0.19",
     "slugify": "^1.6.5",
-    "validator": "^13.9.0"
+    "validator": "^13.9.0",
+    "mongodb": "4.16.0"
   },
   "devDependencies": {
     "prettier": "^2.8.7"
