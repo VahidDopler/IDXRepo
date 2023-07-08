@@ -113,6 +113,8 @@ exports.getSpecificTour = async (req, res) => {
   }
 };
 
+
+
 exports.createNewTour = async (req, res) => {
   try {
     const newTour = await Tour.create(req.body);

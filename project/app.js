@@ -30,9 +30,13 @@ app.use((req, res, next) => {
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/tours', tourRouter);
 
+
+//After all passing middleware , if a route can not found , simply it get here , no matter what is the (get , delete or ..._) it just simply
+//get here
 app.all('*', (req, res, next) => {
   next(new appError(`The ${req.originalUrl} route not found in the server !` , 404));
 });
 
+//A global error handler util for handling all errors of app from any route
 app.use(globalErrorHandler);
 module.exports = app;
