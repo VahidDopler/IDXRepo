@@ -140,7 +140,6 @@ tourSchema.post("findOneAndUpdate", function (docs , next){
 //aggregation middleware
 
 tourSchema.pre('aggregate', function (next) {
-    console.log(this.pipeline())
     this.pipeline().unshift({
         $match: {
             secretTour: {$ne: true}

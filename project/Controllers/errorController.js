@@ -1,7 +1,5 @@
 //With defining 4 parameters , express automatically knows , it is error handling method 😀
 module.exports = (err, req, res, next) => {
-  console.log('Here in error middleware');
-  console.log(err.statusCode);
   err.status = err.status || 'failed';
   err.statusCode = err.statusCode || 500;
   res.status(err.statusCode).json({
