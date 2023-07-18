@@ -28,9 +28,18 @@ const app = require('./app');
 const port = process.env.PORT;
 
 //starting server
-app.listen(port, () => {
+const server = app.listen(port, () => {
   // eslint-disable-next-line no-console
   console.log('server is running in port ', port);
 });
+
+process.on('unhandledRejection' ,(err) => {
+  console.warn(err.name , err.message)
+  server.close(() => {
+    console.warn('Server is shutting down 😴');
+    process.exit(1);
+  })
+})
+
 
 //Comment

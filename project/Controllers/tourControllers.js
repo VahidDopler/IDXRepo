@@ -2,7 +2,7 @@
 const Tour = require("../models/tourModel");
 const deleteTourModel = require("../models/deleteTourLog");
 const APIFeatures = require("../utils/APIFeatures");
-const AppError = require('../utils/AppError');
+const AppError = require("../utils/AppError");
 const { limitFieldOfDocObject } = require("../utils/UpdateUtils");
 //In here we're just turning try/catch block into a promising object to handle it 😂
 const catchAsync = require("../utils/catchAsync");
@@ -15,7 +15,7 @@ exports.getaliesTour = (req, res, next) => {
   next();
 };
 
-exports.getAllTours = catchAsync(async (req, res ,next) => {
+exports.getAllTours = catchAsync(async (req, res, next) => {
   //The new shape of codes
   //we save query detail of query in object then save mongodb obj into object of class
   //then process the object in filter method
@@ -35,15 +35,15 @@ exports.getAllTours = catchAsync(async (req, res ,next) => {
   });
 });
 
-exports.UpdateTour = catchAsync(async (req, res ,next) => {
+exports.UpdateTour = catchAsync(async (req, res, next) => {
   const response = Tour.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true
   });
   const result = await limitFieldOfDocObject(response);
 
-  if(!result) {
-    return next(new AppError('No tour found with this ID' , 404));
+  if (!result) {
+    return next(new AppError("No tour found with this ID", 404));
   }
 
   res.status(200).json({
@@ -57,28 +57,27 @@ exports.UpdateTour = catchAsync(async (req, res ,next) => {
   });
 });
 
-exports.deleteTour = catchAsync(async (req, res ,next) => {
+exports.deleteTour = catchAsync(async (req, res, next) => {
   const saveModelBeforeDelete = await Tour.findById(req.params.id);
   if (saveModelBeforeDelete) {
     await deleteTourModel.create({
       createLog: new Date().toLocaleString(),
-      deletedObject: saveModelBeforeDelete,
+      deletedObject: saveModelBeforeDelete
     });
   }
   const resultForSaving = await Tour.findByIdAndDelete(req.params.id);
   if (!resultForSaving) {
-      return next(new AppError('No tour found with this ID' , 404))
+    return next(new AppError("No tour found with this ID", 404));
   }
   res.status(204).json({
     status: "success"
   });
 });
 
-exports.getSpecificTour = catchAsync(async (req, res ,next) => {
+exports.getSpecificTour = catchAsync(async (req, res, next) => {
     const tour = await Tour.findById(req.params.id);
-
-    if(!tour) {
-      return next(new AppError('No tour found with this ID' , 404));
+    if (!tour) {
+      return next(new AppError("No tour found with this ID", 404));
     }
 
     res.status(200).send({
@@ -91,7 +90,7 @@ exports.getSpecificTour = catchAsync(async (req, res ,next) => {
   }
 );
 
-exports.createNewTour = catchAsync(async (req, res ,next) => {
+exports.createNewTour = catchAsync(async (req, res, next) => {
   const newTour = await Tour.create(req.body);
   res.status(201).json({
     status: "success",
@@ -99,17 +98,17 @@ exports.createNewTour = catchAsync(async (req, res ,next) => {
   });
 });
 
-exports.getTourStats = catchAsync(async (req, res ,next) => {
+exports.getTourStats = catchAsync(async (req, res, next) => {
   const stats = await Tour.aggregate([
     {
       $group: {
-        _id: { $toUpper: '$difficulty' },
+        _id: { $toUpper: "$difficulty" },
         numTours: { $sum: 1 },
-        numRatings: { $sum: '$ratingsQuantity' },
-        avgRating: { $avg: '$ratingsAverage' },
-        avgPrice: { $avg: '$price' },
-        minPrice: { $min: '$price' },
-        maxPrice: { $max: '$price' }
+        numRatings: { $sum: "$ratingsQuantity" },
+        avgRating: { $avg: "$ratingsAverage" },
+        avgPrice: { $avg: "$price" },
+        minPrice: { $min: "$price" },
+        maxPrice: { $max: "$price" }
       }
     },
     {
@@ -117,8 +116,8 @@ exports.getTourStats = catchAsync(async (req, res ,next) => {
     }
   ]);
 
-  if(!stats) {
-    return next(new AppError('No tour found' , 404));
+  if (!stats) {
+    return next(new AppError("No tour found", 404));
   }
 
   res.status(200).send({
@@ -130,7 +129,7 @@ exports.getTourStats = catchAsync(async (req, res ,next) => {
   });
 });
 
-exports.getMonthlyPlan = catchAsync(async (req, res ,next) => {
+exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
   const year = req.params.year * 1;
   const plan = await Tour.aggregate([
     {
@@ -152,7 +151,7 @@ exports.getMonthlyPlan = catchAsync(async (req, res ,next) => {
       }
     },
     {
-      $addFields: { month: "$_id"}
+      $addFields: { month: "$_id" }
     },
 
     {
@@ -196,8 +195,8 @@ exports.getMonthlyPlan = catchAsync(async (req, res ,next) => {
     // },
   ]);
 
-  if(!plan) {
-    return next(new AppError('No tour found' , 404));
+  if (!plan) {
+    return next(new AppError("No tour found", 404));
   }
 
   res.status(200).json({

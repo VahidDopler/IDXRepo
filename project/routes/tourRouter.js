@@ -1,7 +1,6 @@
 const express = require("express");
 // eslint-disable-next-line import/extensions
 const tourController = require("../Controllers/tourControllers.js");
-const checkID = require('../utils/MongoDBUtils')
 const tourRouter = express.Router();
 
 tourRouter.route("/monthly-plan/:year").get(tourController.getMonthlyPlan);
@@ -17,7 +16,6 @@ tourRouter.route("/getTourStats")
 tourRouter
   .route("/:id")
   //In here i add a middleware to check if id input is valid or not
-  .all(checkID.isValidObjectId)
   .delete(tourController.deleteTour)
   .patch(tourController.UpdateTour)
   .get(tourController.getSpecificTour);
