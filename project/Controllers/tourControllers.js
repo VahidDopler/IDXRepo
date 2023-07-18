@@ -1,8 +1,8 @@
 //const fs = require('fs');
 const Tour = require("../models/tourModel");
 const deleteTourModel = require("../models/deleteTourLog");
-const errLogger = require("../functionMilddlers/errSaver");
 const APIFeatures = require("../utils/APIFeatures");
+const AppError = require('../utils/AppError');
 const { limitFieldOfDocObject } = require("../utils/UpdateUtils");
 //In here we're just turning try/catch block into a promising object to handle it 😂
 const catchAsync = require("../utils/catchAsync");
@@ -42,6 +42,10 @@ exports.UpdateTour = catchAsync(async (req, res ,next) => {
   });
   const result = await limitFieldOfDocObject(response);
 
+  if(!result) {
+    return next(new AppError('No tour found with this ID' , 404));
+  }
+
   res.status(200).json({
     status: "success",
     data: {
@@ -54,14 +58,16 @@ exports.UpdateTour = catchAsync(async (req, res ,next) => {
 });
 
 exports.deleteTour = catchAsync(async (req, res ,next) => {
-  const resultForSaving = await Tour.findById(req.params.id);
-  await deleteTourModel.create({
-    createLog: new Date().toDateString(),
-    deletedObject: resultForSaving
-  });
-  await Tour.findByIdAndDelete(req.params.id);
-  if (resultForSaving.deletedCount === 0) {
-    throw new Error("There is no argument with this information");
+  const saveModelBeforeDelete = await Tour.findById(req.params.id);
+  if (saveModelBeforeDelete) {
+    await deleteTourModel.create({
+      createLog: new Date().toLocaleString(),
+      deletedObject: saveModelBeforeDelete,
+    });
+  }
+  const resultForSaving = await Tour.findByIdAndDelete(req.params.id);
+  if (!resultForSaving) {
+      return next(new AppError('No tour found with this ID' , 404))
   }
   res.status(204).json({
     status: "success"
@@ -70,6 +76,11 @@ exports.deleteTour = catchAsync(async (req, res ,next) => {
 
 exports.getSpecificTour = catchAsync(async (req, res ,next) => {
     const tour = await Tour.findById(req.params.id);
+
+    if(!tour) {
+      return next(new AppError('No tour found with this ID' , 404));
+    }
+
     res.status(200).send({
       status: "success",
       requestTime: req.requestTime,
@@ -105,6 +116,10 @@ exports.getTourStats = catchAsync(async (req, res ,next) => {
       $sort: { tourPrice: -1 }
     }
   ]);
+
+  if(!stats) {
+    return next(new AppError('No tour found' , 404));
+  }
 
   res.status(200).send({
     status: "success",
@@ -180,6 +195,10 @@ exports.getMonthlyPlan = catchAsync(async (req, res ,next) => {
     //   $limit: 12,
     // },
   ]);
+
+  if(!plan) {
+    return next(new AppError('No tour found' , 404));
+  }
 
   res.status(200).json({
     status: "success",

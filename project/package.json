@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server.js",
-    "start:prod": "SET NODE_ENV=production & nodemon server.js",
+    "start:pro": "SET NODE_ENV=production& nodemon server.js",
+    "start:dev": "SET NODE_ENV=development& nodemon server.js",
     "debug": "ndb server.js"
   },
   "type": "commonjs",
@@ -14,14 +15,16 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "colors": "^1.4.0",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
+    "mongodb": "4.16.0",
     "mongoose": "^6.5.2",
     "morgan": "^1.10.0",
-    "nodemon": "^2.0.19",
+    "nodemon": "^3.0.1",
     "slugify": "^1.6.5",
     "validator": "^13.9.0",
-    "mongodb": "4.16.0"
+    "winston": "^3.10.0"
   },
   "devDependencies": {
     "prettier": "^2.8.7"

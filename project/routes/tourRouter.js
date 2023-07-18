@@ -16,6 +16,7 @@ tourRouter.route("/getTourStats")
 
 tourRouter
   .route("/:id")
+  //In here i add a middleware to check if id input is valid or not
   .all(checkID.isValidObjectId)
   .delete(tourController.deleteTour)
   .patch(tourController.UpdateTour)
