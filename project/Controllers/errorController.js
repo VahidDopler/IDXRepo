@@ -67,6 +67,7 @@ const sendErrorProd = (err, res) => {
   }
 };
 //With defining 4 parameters , express automatically knows , it is error handling method 😀
+//we divide operational errors to let the user knows what happen
 module.exports = async (err, req, res, next) => {
   err.status = err.status || 'failed';
   err.statusCode = err.statusCode || 500;

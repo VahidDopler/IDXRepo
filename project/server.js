@@ -1,4 +1,18 @@
-(function (require , module , __dirname , __filename , exports){})();
+process.on('unhandledRejection', (err) => {
+  console.warn(err.name, err.message);
+  server.close(() => {
+    console.warn('UnHANDLED REJECTION!! Server is shutting down 😴');
+    process.exit(1);
+  });
+});
+
+process.on('uncaughtException', (err) => {
+  console.warn(err.name, err.message);
+  console.warn('UNCAUGHT EXCEPTION!!  Server is shutting down 😴');
+  process.exit(1);
+});
+
+(function (require, module, __dirname, __filename, exports) {})();
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
@@ -33,13 +47,5 @@ const server = app.listen(port, () => {
   console.log('server is running in port ', port);
 });
 
-process.on('unhandledRejection' ,(err) => {
-  console.warn(err.name , err.message)
-  server.close(() => {
-    console.warn('Server is shutting down 😴');
-    process.exit(1);
-  })
-})
-
-
 //Comment
+
