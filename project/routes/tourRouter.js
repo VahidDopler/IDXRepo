@@ -2,6 +2,7 @@ const express = require("express");
 // eslint-disable-next-line import/extensions
 const tourController = require("../Controllers/tourControllers.js");
 const tourRouter = express.Router();
+const authController = require('../Controllers/authController');
 
 tourRouter.route("/monthly-plan/:year").get(tourController.getMonthlyPlan);
 
@@ -18,20 +19,11 @@ tourRouter
   //In here i add a middleware to check if id input is valid or not
   .delete(tourController.deleteTour)
   .patch(tourController.UpdateTour)
-  .get(tourController.getSpecificTour);
+  .get(authController.protect,tourController.getSpecificTour);
 
 tourRouter
   .route("/")
   .post(tourController.createNewTour)
-  .get(tourController.getAllTours);
-
-// tourRouter.all('*', (req, res, next) => {
-//   const err = new Error(
-//     `The ${req.originalUrl} route not found in the server !`
-//   );
-//   err.statusCode = 404;
-//   err.status = 'failed';
-//   next(err);
-// });
+  .get(authController.protect,tourController.getAllTours);
 
 module.exports = tourRouter;
