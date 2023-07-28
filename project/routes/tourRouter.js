@@ -17,9 +17,9 @@ tourRouter.route("/getTourStats")
 tourRouter
   .route("/:id")
   //In here i add a middleware to check if id input is valid or not
-  .delete(tourController.deleteTour)
   .patch(tourController.UpdateTour)
-  .get(authController.protect,tourController.getSpecificTour);
+  .get(authController.protect,tourController.getSpecificTour)
+  .delete(authController.protect ,authController.restrictTo('admin' , 'lead-guide') ,tourController.deleteTour);
 
 tourRouter
   .route("/")

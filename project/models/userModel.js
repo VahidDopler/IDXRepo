@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const myValidator = require('validator');
-const moment = require('moment');
 require('moment-timezone');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -21,11 +21,17 @@ const userSchema = new mongoose.Schema({
     type: String,
     lowercase: true,
   },
+
   password: {
     type: String,
     select: false,
     required: [true, 'A user must have a password'],
     minLength: [8, 'provide more than 8 characters'],
+  },
+  rolePlayer: {
+    type: String,
+    enum: ['user', 'guide', 'lead-guide', 'admin'],
+    default: 'user',
   },
   passwordConfirm: {
     //select does not work in CREATE and SAVE
@@ -43,16 +49,32 @@ const userSchema = new mongoose.Schema({
   },
   signUpDate: {
     type: String,
-    default: new Intl.DateTimeFormat('en-US', {
-      timeZone: 'Asia/Tehran',
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-    }).format(),
+    // default: new Intl.DateTimeFormat('en-US', {
+    //   timeZone: 'Asia/Tehran',
+    //   year: 'numeric',
+    //   month: 'numeric',
+    //   day: 'numeric',
+    //   hour: 'numeric',
+    //   minute: 'numeric',
+    //   second: 'numeric',
+    // }).format(),
+    default: new Date().toLocaleString('en-US', { timeZone: 'Asia/Tehran' }),
   },
+  passwordChangeAt: {
+    type: Date,
+    default: null,
+  },
+  passwordResetToken: {
+    type: String,
+  },
+  passwordResetExpires: {
+    type: Date,
+  },
+  active : {
+    type: Boolean,
+    default : true,
+    select : false
+  }
 });
 
 userSchema.pre('save', async function (next) {
@@ -65,14 +87,54 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-//We add candidate password because in document we does not have access to password , because
-// this field does not exists in document
+userSchema.pre('save' , function (next){
+  if (!this.isModified('password') || this.isNew) return next();
+  //saving bit slower than making JWT token
+  this.passwordChangeAt = Date.now() - 1000;
+  next();
+})
+
+//We add candidate password because in document we do not have access to password , because
+// this field does not exist in document
 userSchema.methods.correctPassword = async function (
   candidatePassword,
   userPassword
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
+
+userSchema.pre(/^find/ , function(next) {
+  //This point to the current query
+  this.find({active: { $ne : false }})
+  next();
+})
+
+userSchema.methods.changePasswordAfter = function (JWTTimeStamp) {
+  if (this.passwordChangeAt) {
+    const changeTimeStamp = parseInt(
+      this.passwordChangeAt.getTime() / 1000,
+      10
+    );
+
+    return JWTTimeStamp < changeTimeStamp;
+  }
+
+  //Default for the user has not changed the password after the token was issued
+  return false;
+};
+
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  //Token expires in 10 minutes
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000 ;
+  return resetToken;
+};
+
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
