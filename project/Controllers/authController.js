@@ -11,27 +11,43 @@ const generateToken = async function (id) {
   });
 };
 
-const user_new_token = async (message, status_situation, user_id , res) => {
-  res.status(201).json({
+const user_new_token = async (message, status_situation, user_id, res) => {
+  const token = await generateToken(user_id);
+  const cookieOption = {
+    expires: new Date(
+      Date.now() + process.env.JWT_TOKEN_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    secure: true,
+    //cookie will not modify by browser
+    httpOnly: true,
+  };
+  if (process.env.NODE_ENV === 'production')
+    cookieOption.secure = true;
+  res.cookie('jwt', token , cookieOption);
+  res.status(200).json({
     status: status_situation,
     message: message,
-    token: await generateToken(user_id),
-    role : 'user'
+    token: token,
+    role: 'user',
   });
 };
 
 exports.signup = catchAsync(async (req, res) => {
-  const newUser = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    passwordConfirm: req.body.passwordConfirm,
-    passwordChangeAt: req.body.passwordChangeAt,
-  });
+  // const newUser = await User.create({
+  //   name: req.body.name,
+  //   email: req.body.email,
+  //   password: req.body.password,
+  //   passwordConfirm: req.body.passwordConfirm,
+  //   passwordChangeAt: req.body.passwordChangeAt,
+  //   rolePlayer : req.body.role
+  // });
+  const newUser = await User.create(req.body);
+  newUser.password = undefined;
   const token = await generateToken(newUser._id);
   res.status(201).json({
     status: 'success',
     token,
+    newUser
   });
 });
 
@@ -48,9 +64,8 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new appError('Incorrect password or email', 401));
   } else if (await user.correctPassword(password, user.password)) {
-    const token = await generateToken(user._id);
     console.log(user.id);
-    await user_new_token('successfully login' , 'success' , user.id , res)
+    await user_new_token('successfully login', 'success', user.id, res);
   } else {
     res.status(401).json({
       status: 'failed',
@@ -131,7 +146,7 @@ exports.forgotPassword = catchAsync(async function (req, res, next) {
       subject: 'Your password reset Token',
       message: message,
     });
-    await user_new_token('Token sent to email' , 'success' , user._id , res);
+    await user_new_token('Token sent to email', 'success', user._id, res);
   } catch (err) {
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
@@ -162,7 +177,7 @@ exports.resetPassword = catchAsync(async function (req, res, next) {
   //3) Update ChangePasswordAt property for the user
 
   //4) log the user in , send JWT
-  await user_new_token('success' , 'success' , user._id , res)
+  await user_new_token('success', 'success', user._id, res);
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -200,6 +215,11 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   req.body.newPassword = undefined;
   req.body.passwordConfirm = undefined;
   currentUser.password = undefined;
-  await user_new_token('Your password changed successfully' , 'success' , currentUser._id , res)
+  await user_new_token(
+    'Your password changed successfully',
+    'success',
+    currentUser._id,
+    res
+  );
   //4) login user and send jwt
 });

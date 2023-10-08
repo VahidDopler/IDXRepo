@@ -62,7 +62,6 @@ class APIFeatures {
     //Return Entire object to chain the methods
     return this;
   }
-
   pagination() {
     //4) Pagination
     const page = this.queryOfExpress.page * 1 || 1;

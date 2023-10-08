@@ -1,8 +1,9 @@
 const express = require('express');
 const app = express();
 const globalErrorHandler = require('./Controllers/errorController');
-const appError = require('./utils/AppError')
+const appError = require('./utils/AppError');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 // const body_parser = require('body-parser');
 
 //Module Routers
@@ -12,6 +13,14 @@ const tourRouter = require('./routes/tourRouter');
 /**
  * Middlewares
  */
+
+const limiter = rateLimit({
+  max: 200,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many request from this ip , please try again in an hour',
+});
+
+app.use('/app', limiter);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -30,11 +39,12 @@ app.use((req, res, next) => {
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/tours', tourRouter);
 
-
 //After all passing middleware , if a route can not found , simply it get here , no matter what is the (get , delete or ..._) it just simply
 //get here
 app.all('*', (req, res, next) => {
-  next(new appError(`The ${req.originalUrl} route not found in the server !` , 404));
+  next(
+    new appError(`The ${req.originalUrl} route not found in the server !`, 404)
+  );
 });
 
 //A global error handler util for handling all errors of app from any route
